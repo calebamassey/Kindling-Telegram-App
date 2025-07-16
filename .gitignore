@@ -416,3 +416,9 @@ FodyWeavers.xsd
 *.msix
 *.msm
 *.msp
+
+
+# Custom Ignores
+*.json
+requirements.txt
+*.session
