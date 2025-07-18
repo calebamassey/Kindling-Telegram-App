@@ -1,7 +1,7 @@
 import kindling
 
-def main():
-    kindling.telegramChat("Hello World")
+def main() -> None:
+    kindling.startBot()
 
 if __name__ == "__main__":
     main()
