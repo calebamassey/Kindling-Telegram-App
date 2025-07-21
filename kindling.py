@@ -4,14 +4,32 @@ from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.cron import CronTrigger
 import json
 import asyncio
+import random
 
-
+promptCount = -1
 jsonFileName = './info.json'
-timeHour1 = 20
-timeMinute1 = 32
+timeZone = "EST"
+timeHour1 = 12
+timeMinute1 = 00
+timeHour2 = 15
+timeMinute2 = 00
+promptList = [
+    "What's one small thing I did recently that made you smile?",
+    "If we could teleport anywhere right now for a date, where would we go?",
+    "What’s a song that makes you think of me—and why?",
+    "Describe your dream weekend getaway for just the two of us.",
+    "If our relationship were a movie, what genre would it be and what’s the title?",
+    "What’s something you want us to learn or try together this year?",
+    "When did you first realize you liked me more than just a little?",
+    "What’s your favorite physical touch or gesture from me?",
+    "If we had a pet together right now, what would we name it?",
+    "What's one way we could make each other feel even more loved this week?",
+    "If we had a couple's bucket list, what’s one thing you’d put on it today?",
+    "What's something small but meaningful we could do for each other tonight?"
+]
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    await update.message.reply_text("Hello! I will send 'Hello World' every day at the scheduled time.")
+    await update.message.reply_text(getPrompt())
 
 
 async def chat_id(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -31,7 +49,7 @@ async def post_init(application: Application):
 
 
 def start_scheduler(bot, chat_id, loop):
-    scheduler = BackgroundScheduler(timezone="UTC")
+    scheduler = BackgroundScheduler(timezone=timeZone)
     trigger = CronTrigger(hour=timeHour1, minute=timeMinute1)
 
     def job_wrapper():
@@ -77,6 +95,17 @@ def startBot():
 
     application.run_polling()
 
+def randomizePrompt():
+    return random.sample(promptList, len(promptList))  # cleaner shuffle without modifying original
 
-if __name__ == "__main__":
-    startBot()
+def getPrompt():
+    global promptCount, randomPromptList
+
+    if promptCount == -1 or promptCount >= len(promptList):
+        randomPromptList = randomizePrompt()
+        promptCount = 0
+
+    prompt = randomPromptList[promptCount]
+    promptCount += 1
+    print(prompt)
+    return prompt
