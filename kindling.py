@@ -10,9 +10,9 @@ promptCount = -1
 jsonFileName = './info.json'
 timeZone = "EST"
 timeHour1 = 12
-timeMinute1 = 00
-timeHour2 = 15
-timeMinute2 = 00
+timeMinute1 = 12
+timeHour2 = 12
+timeMinute2 = 13
 promptList = [
     "What's one small thing I did recently that made you smile?",
     "If we could teleport anywhere right now for a date, where would we go?",
@@ -36,8 +36,8 @@ async def chat_id(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(f"Chat ID: {update.effective_chat.id}")
 
 
-async def send_hello_world(bot, chat_id):
-    await bot.send_message(chat_id=chat_id, text="Hello World")
+async def send_prompt(bot, chat_id):
+    await bot.send_message(chat_id=chat_id, text=getPrompt())
 
 
 async def post_init(application: Application):
@@ -51,14 +51,16 @@ async def post_init(application: Application):
 def start_scheduler(bot, chat_id, loop):
     scheduler = BackgroundScheduler(timezone=timeZone)
     trigger = CronTrigger(hour=timeHour1, minute=timeMinute1)
+    trigger2 = CronTrigger(hour=timeHour2, minute=timeMinute2)
 
     def job_wrapper():
         asyncio.run_coroutine_threadsafe(
-            send_hello_world(bot, chat_id),
+            send_prompt(bot, chat_id),
             loop
         )
 
-    scheduler.add_job(job_wrapper, trigger, id="daily_hello_world", replace_existing=True)
+    scheduler.add_job(job_wrapper, trigger, id="first_prompt", replace_existing=True)
+    scheduler.add_job(job_wrapper, trigger2, id="second_prompt", replace_existing=True)
     scheduler.start()
 
 
@@ -104,8 +106,8 @@ def getPrompt():
     if promptCount == -1 or promptCount >= len(promptList):
         randomPromptList = randomizePrompt()
         promptCount = 0
-
-    prompt = randomPromptList[promptCount]
-    promptCount += 1
-    print(prompt)
-    return prompt
+        return getPrompt()
+    else:
+        prompt = randomPromptList[promptCount]
+        promptCount += 1
+        return prompt
